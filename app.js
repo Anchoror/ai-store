@@ -6,6 +6,10 @@ const views = require("koa-views");
 const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const util = require("util");
+
+// 将 exec 包装为 Promise
+const execPromise = util.promisify(exec);
 
 const app = new Koa();
 const router = new Router();
@@ -28,11 +32,11 @@ router.post("/api/generate", async (ctx) => {
   }
 
   try {
-    const command = `python3 py/tts_inference.py "${prompt}"`;
+    const command = `python py/tts_inference.py "${prompt}"`;
 
     console.log(`Executing command: ${command}`);
 
-    const { stdout, stderr } = await exec(command);
+    const { stdout, stderr } = await execPromise(command);
 
     if (stderr) {
       console.error(`stderr: ${stderr}`);
@@ -44,7 +48,7 @@ router.post("/api/generate", async (ctx) => {
     console.log(`stdout: ${stdout}`);
 
     // 读取生成的音频文件
-    const audioPath = path.join(__dirname, "py/output.wav");
+    const audioPath = path.join(__dirname, "output.wav");
 
     // 检查音频文件是否存在
     if (!fs.existsSync(audioPath)) {

@@ -19,10 +19,7 @@ def text_to_speech(text):
 
     # 保存为 WAV 文件
     sf.write('output.wav', audio_data, sampling_rate)
-    
-    # # 保存语音文件
-    # with open("output.wav", "wb") as f:
-    #     f.write(audio["wav"])
+
 
 
 if __name__ == "__main__":
