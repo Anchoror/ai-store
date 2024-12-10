@@ -4,9 +4,75 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %></title>
+
+    <style>
+      .img {
+        width: 300px;
+        height: 300px;
+      }
+    </style>
   </head>
   <body>
     <h1><%= title %></h1>
-    <img src="<%= img %>" alt="" />
+
+    <button id="btn">获取故事图文</button>
+    <ul id="container"></ul>
   </body>
+
+  <script>
+    const btn = document.getElementById("btn");
+    btn.onclick = () => {
+      fetch("/api/story/gen", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: "写一个关于一只猫的故事",
+        }),
+      });
+    };
+
+    fetch("/api/story/list", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        for (const item of data.data) {
+          const li = document.createElement("li");
+          li.innerHTML = `
+                <li>
+                  <p><span>_id: ${item._id}</span> <button id="mix" data-id="${item._id} ">合成</button></p>
+                </li>
+                
+              `;
+          document.getElementById("container").appendChild(li);
+        }
+
+        const mixBtns = document.querySelectorAll("button#mix");
+        mixBtns.forEach((btn) => {
+          btn.onclick = handleMix;
+        });
+      });
+    const handleMix = (e) => {
+      console.log(e);
+      const id = e.target.dataset.id;
+      fetch("/api/story/mix", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+        });
+    };
+  </script>
 </html>
