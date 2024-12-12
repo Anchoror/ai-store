@@ -30,33 +30,44 @@
         body: JSON.stringify({
           prompt: "写一个关于一只猫的故事",
         }),
+      }).then((res) => {
+        getList();
       });
     };
 
-    fetch("/api/story/list", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        for (const item of data.data) {
-          const li = document.createElement("li");
-          li.innerHTML = `
+    const getList = () => {
+      const container = document.getElementById("container");
+      container.innerHTML = "";
+      fetch("/api/story/list", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          for (const item of data.data) {
+            const imgs = item.result.img.map((img) => {
+              return `<p><a href="${img}">${img}</a></p>`;
+            });
+            const li = document.createElement("li");
+            li.innerHTML = `
                 <li>
-                  <p><span>_id: ${item._id}</span> <button id="mix" data-id="${item._id} ">合成</button></p>
+                  <p><span>_id: ${item._id}</span> <button id="mix" data-id="${
+              item._id
+            }">合成</button></p>
+                  ${imgs.join("")}
                 </li>
-                
               `;
-          document.getElementById("container").appendChild(li);
-        }
+            container.appendChild(li);
+          }
 
-        const mixBtns = document.querySelectorAll("button#mix");
-        mixBtns.forEach((btn) => {
-          btn.onclick = handleMix;
+          const mixBtns = document.querySelectorAll("button#mix");
+          mixBtns.forEach((btn) => {
+            btn.onclick = handleMix;
+          });
         });
-      });
+    };
     const handleMix = (e) => {
       console.log(e);
       const id = e.target.dataset.id;
@@ -71,8 +82,15 @@
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
+          const video = document.createElement("video");
+          video.src = "/itv/concat_video.mp4";
+          video.controls = true;
+          video.autoplay = true;
+          video.style = "width: 100vw;  aspect-ratio: 16 / 9;background: #000";
+          document.body.appendChild(video);
         });
     };
+
+    getList();
   </script>
 </html>
