@@ -35,6 +35,7 @@ const genStory = async (prompt) => {
         audio: data.audio,
         img: data.img,
         text: data.text,
+        video: "",
       },
     });
     return workflow;

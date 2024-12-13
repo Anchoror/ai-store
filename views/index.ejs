@@ -47,15 +47,17 @@
         .then((res) => res.json())
         .then((data) => {
           for (const item of data.data) {
+            const video = item.result?.video;
             const imgs = item.result.img.map((img) => {
               return `<p><a href="${img}">${img}</a></p>`;
             });
             const li = document.createElement("li");
+            const id = item._id;
             li.innerHTML = `
                 <li>
-                  <p><span>_id: ${item._id}</span> <button id="mix" data-id="${
-              item._id
-            }">合成</button></p>
+                  <p><span>_id: ${id}</span> <button id="mix" data-id="${id}">合成</button><button id="del" data-id="${id}">删除</button> ${
+              video ? `<button id="play" data-id="${id}">观看</button>` : ""
+            }</p>
                   ${imgs.join("")}
                 </li>
               `;
@@ -65,6 +67,14 @@
           const mixBtns = document.querySelectorAll("button#mix");
           mixBtns.forEach((btn) => {
             btn.onclick = handleMix;
+          });
+          const delBtns = document.querySelectorAll("button#del");
+          delBtns.forEach((btn) => {
+            btn.onclick = handleDel;
+          });
+          const playBtns = document.querySelectorAll("button#play");
+          playBtns.forEach((btn) => {
+            btn.onclick = handlePlay;
           });
         });
     };
@@ -82,13 +92,40 @@
       })
         .then((res) => res.json())
         .then((data) => {
-          const video = document.createElement("video");
-          video.src = "/itv/concat_video.mp4";
-          video.controls = true;
-          video.autoplay = true;
-          video.style = "width: 100vw;  aspect-ratio: 16 / 9;background: #000";
-          document.body.appendChild(video);
+          getList();
         });
+    };
+
+    const handleDel = (e) => {
+      console.log(e);
+      const id = e.target.dataset.id;
+      fetch("/api/story/del", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          getList();
+        });
+    };
+
+    const handlePlay = (e) => {
+      const id = e.target.dataset.id;
+      let video = document.querySelector("video");
+      if (video) {
+        video.remove();
+      }
+      video = document.createElement("video");
+      video.src = `/itv/video_${id}.mp4`;
+      video.controls = true;
+      video.autoplay = true;
+      video.style = "width: 100vw;aspect-ratio: 16 / 9;background: #000";
+      document.body.appendChild(video);
     };
 
     getList();

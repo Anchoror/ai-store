@@ -36,7 +36,8 @@ const createVideoFromImageAndAudio = (
   imagePath,
   text,
   fontPath,
-  outputPath
+  outputPath,
+  index
 ) => {
   const arr = text.split("");
   arr.splice(18, 0, "\n");
@@ -75,7 +76,12 @@ const createVideoFromImageAndAudio = (
       ])
       .output(outputPath)
       .on("end", () => {
-        console.log("视频生成完成----", audioPath, imagePath, outputPath);
+        console.log(
+          `视频 ${index} 生成完成--`,
+          audioPath,
+          imagePath,
+          outputPath
+        );
         resolve(outputPath);
       })
       .on("error", (err) => {
@@ -122,7 +128,8 @@ const mix = async (id) => {
       tempImgPath,
       text,
       fontPath,
-      tempVideoPath
+      tempVideoPath,
+      i
     );
   }
 
@@ -135,15 +142,21 @@ const mix = async (id) => {
 
   outputStream.end();
 
-  const outputPath = path.join(__dirname, "../static/itv/concat_video.mp4");
+  const outputPath = path.join(__dirname, `../static/itv/video_${id}.mp4`);
 
   return new Promise((resolve, reject) => {
     command
       .input(concatFilePath)
       .inputOptions(["-f", "concat", "-safe", "0"])
       .output(outputPath)
-      .on("end", () => {
+      .on("end", async () => {
         console.log("最终视频合并完成");
+        await db
+          .collection("aiRes")
+          .updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { result: { ...data.result, video: outputPath } } }
+          );
         resolve(outputPath);
         // 清理临时文件
         // tempVideoFiles.forEach((filePath) => {
