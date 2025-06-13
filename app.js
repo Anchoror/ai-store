@@ -1,13 +1,13 @@
 require("dotenv").config({
   path: [".env.local", ".env"],
 });
+
 const Koa = require("koa");
 const bodyParser = require("koa-bodyparser");
 const views = require("koa-views");
 const path = require("path");
 const router = require("./routes");
 const serve = require("koa-static");
-
 const app = new Koa();
 
 app.use(bodyParser());

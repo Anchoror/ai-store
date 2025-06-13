@@ -8,6 +8,7 @@ const axios = require("axios");
 const command = ffmpeg();
 
 const downloadFile = async (url, dest) => {
+  if (!url.startsWith("http")) url = "https://" + url;
   try {
     const response = await axios({
       method: "get",
